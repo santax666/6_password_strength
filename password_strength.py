@@ -9,45 +9,27 @@ def has_bad_pass(value):
                  'welcome', '1234567890', 'abc123', '111111', '1qaz2wsx',
                  'dragon', 'master', 'monkey', 'letmein', 'login',
                  'princess', 'qwertyuiop', 'solo', 'passw0rd', 'starwars']
-    if not top25pass.count(value):
-        return False
-    else:
-        return True
+    return value in top25pass
 
 
 def has_digit(value):
-    if re.search(r'\d', value) is None:
-        return False
-    else:
-        return True
+    return bool(re.search(r'\d', value))
 
 
 def has_letter(value):
-    if re.search(r'[А-Яа-яA-Za-zЁё]', value) is None:
-        return False
-    else:
-        return True
+    return bool(re.search(r'[А-Яа-яA-Za-zЁё]', value))
 
 
 def has_low_letter(value):
-    if re.search(r'[а-яa-zё]', value) is None:
-        return False
-    else:
-        return True
+    return bool(re.search(r'[а-яa-zё]', value))
 
 
 def has_up_letter(value):
-    if re.search(r'[А-ЯA-ZЁ]', value) is None:
-        return False
-    else:
-        return True
+    return bool(re.search(r'[А-ЯA-ZЁ]', value))
 
 
 def has_spec_char(value):
-    if re.search(r'[^А-Яа-яA-Za-zЁё0-9]', value) is None:
-        return False
-    else:
-        return True
+    return bool(re.search(r'[^А-Яа-яA-Za-zЁё0-9]', value))
 
 
 def str_to_date(value):
@@ -64,10 +46,7 @@ def str_to_date(value):
 
 
 def has_calendar_date(value):
-    if str_to_date(value) is None:
-        return False
-    else:
-        return True
+    return bool(str_to_date(value))
 
 
 def has_phone_number(value):
@@ -118,6 +97,11 @@ def get_password_strength(value):
 
 
 if __name__ == '__main__':
+    print(True + True + True)
+
+#    print(bool(re.search(r'\d', '567hghgh')))
+
+"""
     if len(sys.argv) > 1:
         if sys.argv[1] == '--help':
             print('Скрипт просит ввести пароль и выдает ему оценку от 1 до 10')
@@ -131,3 +115,4 @@ if __name__ == '__main__':
     else:
         password = input('Пожалуйста, введите пароль для оценки: ')
         get_password_strength(password)
+"""
