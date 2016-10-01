@@ -1,6 +1,8 @@
 import datetime
 import re
 import sys
+import math
+import argparse
 
 
 def has_bad_pass(value):
@@ -46,73 +48,51 @@ def str_to_date(value):
 
 
 def has_calendar_date(value):
-    return bool(str_to_date(value))
+    return not bool(str_to_date(value))
 
 
 def has_phone_number(value):
     if (re.match(r'[8]{1}[9]{1}[0-9]{9}', value) and len(value)) == 11:
-        return True
-    elif (re.match(r'[+]{1}[7]{1}[9]{1}[0-9]{9}', value) and len(value)) == 12:
-        return True
-    else:
         return False
+    elif (re.match(r'[+]{1}[7]{1}[9]{1}[0-9]{9}', value) and len(value)) == 12:
+        return False
+    else:
+        return True
+
+def get_bit_resistance(value):
+    sum_array = (((has_digit(value) + has_letter(value)) +
+                (has_low_letter(value) + has_up_letter(value))) +
+                ((has_spec_char(value) + has_calendar_date(value)) +
+                has_phone_number(value)))
+    length = len(value)
+    bit_resist = math.log(sum_array) * (length / math.log(2))
+    return bit_resist
 
 
 def get_password_strength(value):
     if has_bad_pass(value):
         password_score = 1
     else:
-        if (has_digit(value) and has_letter(value) and
-                has_spec_char(value)):
-            password_score = 10
-        elif (not has_digit(value) and has_letter(value) and
-              has_spec_char(value)):
-            password_score = 9
-        elif (has_digit(value) and not has_letter(value) and
-              has_spec_char(value) and not has_calendar_date(value) and
-              not has_phone_number(value)):
-            password_score = 8
-        elif (has_digit(value) and has_letter(value) and
-              not has_spec_char(value)):
-            password_score = 7
-        elif (not has_digit(value) and not has_letter(value) and
-              has_spec_char(value)):
-            password_score = 6
-        elif (not has_digit(value) and has_letter(value) and
-              not has_spec_char(value)):
-            if (has_low_letter(value) and has_up_letter(value)):
-                password_score = 5
-            else:
-                password_score = 4
-        else:
-            if not (has_calendar_date(value) or has_phone_number(value)):
-                password_score = 3
-            else:
-                password_score = 2
-        if 3 < len(value) < 8:
-            password_score = round(password_score / 2 + 0.1)
-        elif len(value) < 4:
-            password_score = round(password_score / 4 + 0.1)
-    print('По 10-бальной шкале вашему паролю дана оценка:', password_score)
+        bit_resist = get_bit_resistance(value)
+        password_score = math.ceil(bit_resist / 9)
+    return password_score
+
+
+def createParser():
+    parser = argparse.ArgumentParser(usage='%(prog)s [аргументы]',
+                                     description="Оценка сложности пароля"
+                                                 " с помощью %(prog)s")
+    parser.add_argument("password", nargs='?', help="пароль для оценки")
+    return parser
+
 
 
 if __name__ == '__main__':
-    print(True + True + True)
+    parser = createParser()
+    namespace = parser.parse_args()
+    password = namespace.password
 
-#    print(bool(re.search(r'\d', '567hghgh')))
-
-"""
-    if len(sys.argv) > 1:
-        if sys.argv[1] == '--help':
-            print('Скрипт просит ввести пароль и выдает ему оценку от 1 до 10')
-            print('Пароль можно указать аргументом в командной строке.')
-            print('')
-            print('Введите в терминале: python3.5 password_strength.py')
-            print('или же')
-            print('Введите в терминале: python3.5 password_strength.py pass')
-        else:
-            get_password_strength(sys.argv[1])
-    else:
+    if not password:
         password = input('Пожалуйста, введите пароль для оценки: ')
-        get_password_strength(password)
-"""
+    password_score = get_password_strength(password)
+    print('По 10-бальной шкале вашему паролю дана оценка:', password_score)
